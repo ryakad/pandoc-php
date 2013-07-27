@@ -1,5 +1,6 @@
 {
     "name": "ryakad/pandoc-php",
+    "license": "MIT",
     "autoload": {
         "psr-0": {
             "Pandoc": "src"
