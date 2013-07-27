@@ -1,0 +1,8 @@
+{
+    "name": "ryakad/pandoc-php",
+    "autoload": {
+        "psr-0": {
+            "Pandoc": "src"
+        }
+    }
+}
