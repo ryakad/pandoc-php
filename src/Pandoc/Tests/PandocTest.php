@@ -17,6 +17,11 @@ use Pandoc\Pandoc;
  */
 class PandocTest extends \PHPUnit_Framework_TestCase
 {
+    public function setup()
+    {
+        $this->pandoc = new Pandoc();
+    }
+
     /**
      * @expectedException Pandoc\PandocException
      */
@@ -25,12 +30,60 @@ class PandocTest extends \PHPUnit_Framework_TestCase
         $pandoc = new Pandoc('/bin/notpandoc');
     }
 
+    /**
+     * @expectedException Pandoc\PandocException
+     */
+    public function testInvalidFromTypeTriggersException()
+    {
+        $this->pandoc->convert("#Test Content", "not_value", "plain");
+    }
+
+    /**
+     * @expectedException Pandoc\PandocException
+     */
+    public function testInvalidToTypeTriggersException()
+    {
+        $this->pandoc->convert("#Test Content", "html", "not_valid");
+    }
+
     public function testBasicMarkdownToHTML()
     {
-        $pandoc = new Pandoc();
         $this->assertEquals(
             '<h1>Test Heading</h1>',
-            $pandoc->convert("#Test Heading", "markdown_github", "html")
+            $this->pandoc->convert("#Test Heading", "markdown_github", "html")
         );
+    }
+
+    public function testRunWithConvertsBasicMarkdownToHTML()
+    {
+        $options = array(
+            'from' => 'markdown',
+            'to'   => 'json'
+        );
+
+        $this->assertEquals(
+            '[{"docTitle":[],"docAuthors":[],"docDate":[]},[{"Header":[1,["heading",[],[]],[{"Str":"Heading"}]]}]]',
+            $this->pandoc->runWith('#Heading', $options)
+        );
+    }
+
+    public function testCanConvertMultipleSuccessfully()
+    {
+        $this->pandoc->convert(
+            "#Heading 1\n##Heading 2",
+            "markdown",
+            "html"
+        );
+
+        $this->assertEquals(
+            "<h3 id=\"heading-3\">Heading 3</h3>\n<h4 id=\"heading-4\">Heading 4</h4>",
+            $this->pandoc->convert(
+                "###Heading 3\n####Heading 4",
+                "markdown",
+                "html"
+            )
+        );
+
+
     }
 }

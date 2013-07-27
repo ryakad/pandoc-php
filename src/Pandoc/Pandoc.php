@@ -104,7 +104,10 @@ class Pandoc
         // we will use the unix which command to find what we are looking
         // for.
         if ( ! $executable) {
-            $this->executable = system('which pandoc', $returnVar);
+            exec('which pandoc', $output, $returnVar);
+            if ($returnVar === 0) {
+                $this->executable = $output[0];
+            }
         } else {
             $this->executable = $executable;
             system(sprintf('type %s &>/dev/null', $executable), $returnVar);
@@ -144,6 +147,45 @@ class Pandoc
             $this->executable,
             $from,
             $to,
+            $this->tmpFile
+        );
+
+        exec($command, $output);
+
+        return implode("\n", $output);
+    }
+
+    /**
+     * Run the pandoc command with specific options.
+     *
+     * Provides more control over what happens. You simply pass an array of
+     * key value pairs of the command options omitting the -- from the start.
+     * If you want to pass a command that takes no argument you set its value
+     * to null.
+     *
+     * @param string $content The content to run the command on
+     * @param array  $options The options to use
+     *
+     * @return string The returned content
+     */
+    public function runWith($content, $options)
+    {
+        $commandOptions = array();
+        foreach ($options as $key => $value) {
+            if (null === $value) {
+                $commandOptions[] = "--$key";
+                continue;
+            }
+
+            $commandOptions[] = "--$key=$value";
+        }
+
+        file_put_contents($this->tmpFile, $content);
+
+        $command = sprintf(
+            "%s %s %s",
+            $this->executable,
+            implode(' ', $commandOptions),
             $this->tmpFile
         );
 
