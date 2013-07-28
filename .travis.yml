@@ -1,13 +1,12 @@
 language:
     - php
-    - haskell
 
 php:
     - 5.4
     - 5.5
 
 before_script:
-    - cabal install pandoc
+    - sudo apt-get install pandoc
     - composer install --dev
 
 script: phpunit
