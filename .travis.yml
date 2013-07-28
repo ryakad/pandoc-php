@@ -6,7 +6,12 @@ php:
     - 5.5
 
 before_script:
-    - sudo apt-get install pandoc
     - composer install --dev
+    - sudo apt-get install ghc
+    - sudo apt-get install haskell-platform
+    - cabal update
+    - cabal install pandoc
+    - export PATH="$PATH:$HOME/.cabal/bin"
+    - pandoc --version
 
 script: phpunit
