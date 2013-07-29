@@ -1,6 +1,8 @@
 Pandoc PHP
 ==========
 
+[![Build Status](https://secure.travis-ci.org/ryakad/pandoc-php.png)](http://travis-ci.org/ryakad/pandoc-php)
+
 Pandoc PHP is a naive wrapper for the pandoc command. Pandoc is a Haskell
 program that allows you to convert docuemnts from one format to another. For
 more information on Pandoc you can look [here](https://github.com/jgm/pandoc).
