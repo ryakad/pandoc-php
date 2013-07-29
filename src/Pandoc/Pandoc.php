@@ -100,21 +100,21 @@ class Pandoc
         );
 
         // Since we can not validate that the command that they give us is
-        // *really* pandoc we will just check that its something. Otherwise
-        // we will use the unix which command to find what we are looking
-        // for.
+        // *really* pandoc we will just check that its something.
+        // If the provide no path to pandoc we will try to find it on our own
         if ( ! $executable) {
             exec('which pandoc', $output, $returnVar);
             if ($returnVar === 0) {
                 $this->executable = $output[0];
+            } else {
+                throw new PandocException('Unable to locate pandoc');
             }
         } else {
             $this->executable = $executable;
-            system(sprintf('type %s &>/dev/null', $executable), $returnVar);
         }
 
-        if ($returnVar !== 0) {
-            throw new PandocException('Unable to locate pandoc');
+        if ( ! is_executable($this->executable)) {
+            throw new PandocException('Pandoc executable is not executable');
         }
     }
 
