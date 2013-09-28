@@ -33,7 +33,7 @@ class Pandoc
      * List of valid input types
      * @var array
      */
-    private $inputFormats = [
+    private $inputFormats = array(
         "native",
         "json",
         "markdown",
@@ -47,13 +47,13 @@ class Pandoc
         "textile",
         "html",
         "latex"
-    ];
+    );
 
     /**
      * List of valid output types
      * @var array
      */
-    private $outputFormats = [
+    private $outputFormats = array(
         "native",
         "json",
         "docx",
@@ -86,7 +86,7 @@ class Pandoc
         "rtf",
         "org",
         "asciidoc"
-    ];
+    );
 
     /**
      * Setup path to the pandoc binary
