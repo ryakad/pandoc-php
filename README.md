@@ -35,3 +35,15 @@ $html = $pandoc->convert("#Hello Pandoc", "markdown_github", "html");
 
 For a full listing of formats that can be converted to/from you should take
 a look at the Pandoc documentation or the Pandoc help message `pandoc --help`.
+
+If you need more control over how the conversion will be executed, use the `runWith` method. 
+This method takes two arguments, content to convert and an array containing options. 
+The options array can hold any of the pandoc command line options, see `pandoc --help`.
+```php
+$pandoc = new Pandoc\Pandoc();
+$options = array(
+    "from"  => "markdown",
+    "to"    => "html",
+    "css"   => "/assets/css/documents.css");
+    $html = $pandoc->runWith("#Hello Pandoc", $options);
+```
