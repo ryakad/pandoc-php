@@ -172,6 +172,10 @@ class Pandoc
     {
         $commandOptions = array();
         foreach ($options as $key => $value) {
+            if ($key == 'to' && $value == 'pdf') {
+                $commandOptions[] = '-o '.$this->tmpFile.'.pdf';
+                continue;
+            }
             if (null === $value) {
                 $commandOptions[] = "--$key";
                 continue;
@@ -190,8 +194,12 @@ class Pandoc
         );
 
         exec($command, $output);
-
-        return implode("\n", $output);
+        
+        if ($options['to'] == 'pdf') {
+            return file_get_contents($this->tmpFile.'.pdf');
+        } else {
+            return implode("\n", $output);
+        }
     }
 
     /**
@@ -201,6 +209,10 @@ class Pandoc
     {
         if (file_exists($this->tmpFile)) {
             @unlink($this->tmpFile);
+        }
+
+        if (file_exists($this->tmpFile.'.pdf')) {
+            @unlink($this->tmpFile.'.pdf');
         }
     }
 }
