@@ -48,21 +48,33 @@ class PandocTest extends \PHPUnit_Framework_TestCase
 
     public function testBasicMarkdownToHTML()
     {
+        if (false === strpos($this->pandoc->getVersion(), '1.12.')) {
+            $this->markTestSkipped(
+                'This test requires pandoc version 1.12'
+            );
+        }
+
         $this->assertEquals(
-            '<h1>Test Heading</h1>',
+            '<h1 id="test-heading">Test Heading</h1>',
             $this->pandoc->convert("#Test Heading", "markdown_github", "html")
         );
     }
 
     public function testRunWithConvertsBasicMarkdownToHTML()
     {
+        if (false === strpos($this->pandoc->getVersion(), '1.12.')) {
+            $this->markTestSkipped(
+                'This test requires pandoc version 1.12'
+            );
+        }
+
         $options = array(
             'from' => 'markdown',
             'to'   => 'json'
         );
 
         $this->assertEquals(
-            '[{"docTitle":[],"docAuthors":[],"docDate":[]},[{"Header":[1,["heading",[],[]],[{"Str":"Heading"}]]}]]',
+            '[{"unMeta":{}},[{"t":"Header","c":[1,["heading",[],[]],[{"t":"Str","c":"Heading"}]]}]]',
             $this->pandoc->runWith('#Heading', $options)
         );
     }
@@ -83,7 +95,5 @@ class PandocTest extends \PHPUnit_Framework_TestCase
                 "html"
             )
         );
-
-
     }
 }

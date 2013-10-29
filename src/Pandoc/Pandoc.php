@@ -203,4 +203,16 @@ class Pandoc
             @unlink($this->tmpFile);
         }
     }
+
+    /**
+     * Returns the pandoc version number
+     *
+     * @return string
+     */
+    public function getVersion()
+    {
+        exec(sprintf('%s --version', $this->executable), $output);
+
+        return trim(str_replace('pandoc', '', $output[0]));
+    }
 }
