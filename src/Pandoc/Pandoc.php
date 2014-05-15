@@ -171,11 +171,66 @@ class Pandoc
     public function runWith($content, $options)
     {
         $commandOptions = array();
+        
+        $extFilesFormat = array(
+            'docx', 
+            'odt',
+            'epub',
+            'fb2',
+            'pdf'
+        );
+
+        $extFilesHtmlSlide = array(
+            's5',
+            'slidy',
+            'dzslides',
+            'slideous'
+        );
+            
         foreach ($options as $key => $value) {
-            if ($key == 'to' && $value == 'pdf') {
-                $commandOptions[] = '-o '.$this->tmpFile.'.pdf';
+            if ($key == 'to' && in_array($value, $extFilesFormat)) {
+                $commandOptions[] = '-s -S -o '.$this->tmpFile.'.'.$value;
+                $format = $value;
+                continue;
+            } else if ($key == 'to' && in_array($value, $extFilesHtmlSlide)) {
+                $commandOptions[] = '-s -t '.$value.' -o '.$this->tmpFile.'.html';
+                $format = 'html';
+                continue;
+            } else if ($key == 'to' && $value == 'epub3') {
+                $commandOptions[] = '-S -o '.$this->tmpFile.'.epub';
+                $format = 'epub';
+                continue; 
+            } else if ($key == 'to' && $value == 'beamer') {
+                $commandOptions[] = '-s -t beamer -o '.$this->tmpFile.'.pdf';
+                $format = 'pdf';
+                continue;
+            } else if ($key == 'to' && $value == 'latex') {
+                $commandOptions[] = '-s -o '.$this->tmpFile.'.tex';
+                $format = 'tex';
+                continue;
+            } else if ($key == 'to' && $value == 'rst') {
+                $commandOptions[] = '-s -t rst --toc -o '.$this->tmpFile.'.text';
+                $format = 'text';
+                continue;
+            } else if ($key == 'to' && $value == 'rtf') {
+                $commandOptions[] = '-s -o '.$this->tmpFile.'.'.$value;
+                $format = $value;
+                continue;
+            } else if ($key == 'to' && $value == 'docbook') {
+                $commandOptions[] = '-s -S -t docbook -o '.$this->tmpFile.'.db';
+                $format = 'db';
+                continue;
+            } else if ($key == 'to' && $value == 'context') {
+                $commandOptions[] = '-s -t context -o '.$this->tmpFile.'.tex';
+                $format = 'tex';
+                continue;
+            } else if ($key == 'to' && $value == 'asciidoc') {
+                $commandOptions[] = '-s -S -t asciidoc -o '.$this->tmpFile.'.txt';
+                $format = 'txt';
                 continue;
             }
+             
+
             if (null === $value) {
                 $commandOptions[] = "--$key";
                 continue;
@@ -185,7 +240,7 @@ class Pandoc
         }
 
         file_put_contents($this->tmpFile, $content);
-
+            
         $command = sprintf(
             "%s %s %s",
             $this->executable,
@@ -195,8 +250,8 @@ class Pandoc
 
         exec($command, $output);
         
-        if ($options['to'] == 'pdf') {
-            return file_get_contents($this->tmpFile.'.pdf');
+        if (isset($format)) {
+                return file_get_contents($this->tmpFile.'.'.$format);
         } else {
             return implode("\n", $output);
         }
@@ -211,8 +266,8 @@ class Pandoc
             @unlink($this->tmpFile);
         }
 
-        if (file_exists($this->tmpFile.'.pdf')) {
-            @unlink($this->tmpFile.'.pdf');
+        foreach (glob($this->tmpFile.'.*') as $filename) {
+            @unlink($filename);
         }
     }
 
