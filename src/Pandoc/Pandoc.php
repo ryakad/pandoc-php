@@ -119,6 +119,14 @@ class Pandoc
     }
 
     /**
+     * @return string
+     */
+    public function getTmpFile()
+    {
+        return $this->tmpFile;
+    }
+
+    /**
      * Run the conversion from one type to another
      *
      * @param string $from The type we are converting from
