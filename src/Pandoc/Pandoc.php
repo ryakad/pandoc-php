@@ -91,12 +91,13 @@ class Pandoc
     /**
      * Setup path to the pandoc binary
      *
+     * @param string $tempDir
      * @param string $executable Path to the pandoc executable
      */
-    public function __construct($executable = null)
+    public function __construct($tempDir, $executable = null)
     {
         $this->tmpFile = sprintf(
-            "%s/%s", sys_get_temp_dir(), uniqid("pandoc")
+            "%s/%s", $tempDir, uniqid("pandoc")
         );
 
         // Since we can not validate that the command that they give us is
