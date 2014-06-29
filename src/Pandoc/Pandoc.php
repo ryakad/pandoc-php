@@ -93,6 +93,7 @@ class Pandoc
      *
      * @param string $tempDir
      * @param string $executable Path to the pandoc executable
+     * @throws PandocException
      */
     public function __construct($tempDir, $executable = null)
     {
@@ -103,7 +104,7 @@ class Pandoc
         // Since we can not validate that the command that they give us is
         // *really* pandoc we will just check that its something.
         // If the provide no path to pandoc we will try to find it on our own
-        if ( ! $executable) {
+        if (!$executable) {
             exec('which pandoc', $output, $returnVar);
             if ($returnVar === 0) {
                 $this->executable = $output[0];
@@ -114,7 +115,7 @@ class Pandoc
             $this->executable = $executable;
         }
 
-        if ( ! is_executable($this->executable)) {
+        if (!is_executable($this->executable)) {
             throw new PandocException('Pandoc executable is not executable');
         }
     }
@@ -130,20 +131,22 @@ class Pandoc
     /**
      * Run the conversion from one type to another
      *
+     * @param string $content
      * @param string $from The type we are converting from
-     * @param string $to   The type we want to convert the document to
+     * @param string $to The type we want to convert the document to
      *
+     * @throws PandocException
      * @return string
      */
     public function convert($content, $from, $to)
     {
-        if ( ! in_array($from, $this->inputFormats)) {
+        if (!in_array($from, $this->inputFormats)) {
             throw new PandocException(
                 sprintf('%s is not a valid input format for pandoc', $from)
             );
         }
 
-        if ( ! in_array($to, $this->outputFormats)) {
+        if (!in_array($to, $this->outputFormats)) {
             throw new PandocException(
                 sprintf('%s is not a valid output format for pandoc', $to)
             );
@@ -161,7 +164,7 @@ class Pandoc
 
         exec($command, $output);
 
-        return implode("\n", $output);
+        return file_get_contents($this->tmpFile);
     }
 
     /**
@@ -173,16 +176,16 @@ class Pandoc
      * to null.
      *
      * @param string $content The content to run the command on
-     * @param array  $options The options to use
+     * @param array $options The options to use
      *
      * @return string The returned content
      */
     public function runWith($content, $options)
     {
         $commandOptions = array();
-        
+
         $extFilesFormat = array(
-            'docx', 
+            'docx',
             'odt',
             'epub',
             'fb2',
@@ -195,50 +198,50 @@ class Pandoc
             'dzslides',
             'slideous'
         );
-            
+
         foreach ($options as $key => $value) {
             if ($key == 'to' && in_array($value, $extFilesFormat)) {
-                $commandOptions[] = '-s -S -o '.$this->tmpFile.'.'.$value;
+                $commandOptions[] = '-s -S -o ' . $this->tmpFile . '.' . $value;
                 $format = $value;
                 continue;
             } else if ($key == 'to' && in_array($value, $extFilesHtmlSlide)) {
-                $commandOptions[] = '-s -t '.$value.' -o '.$this->tmpFile.'.html';
+                $commandOptions[] = '-s -t ' . $value . ' -o ' . $this->tmpFile . '.html';
                 $format = 'html';
                 continue;
             } else if ($key == 'to' && $value == 'epub3') {
-                $commandOptions[] = '-S -o '.$this->tmpFile.'.epub';
+                $commandOptions[] = '-S -o ' . $this->tmpFile . '.epub';
                 $format = 'epub';
-                continue; 
+                continue;
             } else if ($key == 'to' && $value == 'beamer') {
-                $commandOptions[] = '-s -t beamer -o '.$this->tmpFile.'.pdf';
+                $commandOptions[] = '-s -t beamer -o ' . $this->tmpFile . '.pdf';
                 $format = 'pdf';
                 continue;
             } else if ($key == 'to' && $value == 'latex') {
-                $commandOptions[] = '-s -o '.$this->tmpFile.'.tex';
+                $commandOptions[] = '-s -o ' . $this->tmpFile . '.tex';
                 $format = 'tex';
                 continue;
             } else if ($key == 'to' && $value == 'rst') {
-                $commandOptions[] = '-s -t rst --toc -o '.$this->tmpFile.'.text';
+                $commandOptions[] = '-s -t rst --toc -o ' . $this->tmpFile . '.text';
                 $format = 'text';
                 continue;
             } else if ($key == 'to' && $value == 'rtf') {
-                $commandOptions[] = '-s -o '.$this->tmpFile.'.'.$value;
+                $commandOptions[] = '-s -o ' . $this->tmpFile . '.' . $value;
                 $format = $value;
                 continue;
             } else if ($key == 'to' && $value == 'docbook') {
-                $commandOptions[] = '-s -S -t docbook -o '.$this->tmpFile.'.db';
+                $commandOptions[] = '-s -S -t docbook -o ' . $this->tmpFile . '.db';
                 $format = 'db';
                 continue;
             } else if ($key == 'to' && $value == 'context') {
-                $commandOptions[] = '-s -t context -o '.$this->tmpFile.'.tex';
+                $commandOptions[] = '-s -t context -o ' . $this->tmpFile . '.tex';
                 $format = 'tex';
                 continue;
             } else if ($key == 'to' && $value == 'asciidoc') {
-                $commandOptions[] = '-s -S -t asciidoc -o '.$this->tmpFile.'.txt';
+                $commandOptions[] = '-s -S -t asciidoc -o ' . $this->tmpFile . '.txt';
                 $format = 'txt';
                 continue;
             }
-             
+
 
             if (null === $value) {
                 $commandOptions[] = "--$key";
@@ -249,7 +252,7 @@ class Pandoc
         }
 
         file_put_contents($this->tmpFile, $content);
-            
+
         $command = sprintf(
             "%s %s %s",
             $this->executable,
@@ -258,11 +261,11 @@ class Pandoc
         );
 
         exec($command, $output);
-        
+
         if (isset($format)) {
-                return file_get_contents($this->tmpFile.'.'.$format);
+            return file_get_contents($this->tmpFile . '.' . $format);
         } else {
-            return implode("\n", $output);
+            return file_get_contents($this->tmpFile);
         }
     }
 
@@ -275,7 +278,7 @@ class Pandoc
             @unlink($this->tmpFile);
         }
 
-        foreach (glob($this->tmpFile.'.*') as $filename) {
+        foreach (glob($this->tmpFile . '.*') as $filename) {
             @unlink($filename);
         }
     }
