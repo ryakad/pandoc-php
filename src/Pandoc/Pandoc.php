@@ -138,7 +138,7 @@ class Pandoc
     {
         if ( ! in_array($from, $this->inputFormats)) {
             throw new PandocException(
-                sprintf('%s is not a valid input format for pandoc', $to)
+                sprintf('%s is not a valid input format for pandoc', $from)
             );
         }
 
