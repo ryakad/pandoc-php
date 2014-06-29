@@ -19,7 +19,7 @@ class PandocTest extends \PHPUnit_Framework_TestCase
 {
     public function setup()
     {
-        $this->pandoc = new Pandoc();
+        $this->pandoc = new Pandoc(sys_get_temp_dir());
     }
 
     /**
