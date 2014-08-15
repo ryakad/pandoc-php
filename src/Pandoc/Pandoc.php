@@ -248,12 +248,19 @@ class Pandoc
             $this->tmpFile
         );
 
-        exec($command, $output);
-        
-        if (isset($format)) {
+        exec($command, $output, $returnval);
+        if($returnval === 0)
+        {
+            if (isset($format)) {
                 return file_get_contents($this->tmpFile.'.'.$format);
-        } else {
-            return implode("\n", $output);
+            } else {
+                return implode("\n", $output);
+            }
+        }else
+        {
+            throw new PandocException(
+                sprintf('Pandoc could not convert successfully, error code: %s. Tried to run the following command: %s', $returnval, $command)
+            );
         }
     }
 
