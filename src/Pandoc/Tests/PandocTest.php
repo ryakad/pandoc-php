@@ -83,7 +83,7 @@ class PandocTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testRunWithConvertsBasicMarkdownToHTML()
+    public function testRunWithConvertsBasicMarkdownToJSON()
     {
         if (false === strpos($this->pandoc->getVersion(), '1.12.')) {
             $this->markTestSkipped(
