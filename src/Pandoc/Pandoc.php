@@ -30,6 +30,12 @@ class Pandoc
     private $tmpFile;
 
     /**
+     * Directory to store temporary files
+     * @var string
+     */
+    private $tmpDir;
+
+    /**
      * List of valid input types
      * @var array
      */
@@ -92,12 +98,29 @@ class Pandoc
      * Setup path to the pandoc binary
      *
      * @param string $executable Path to the pandoc executable
+     * @param string $tmpDir     Path to where we want to store temporary files
      */
-    public function __construct($executable = null)
+    public function __construct($executable = null, $tmpDir = null)
     {
-        $this->tmpFile = sprintf(
-            "%s/%s", sys_get_temp_dir(), uniqid("pandoc")
-        );
+        if ( ! $tmpDir) {
+            $tmpDir = sys_get_temp_dir();
+        }
+
+        if ( ! file_exists($tmpDir)) {
+            throw new PandocException(
+                sprintf('The directory %s does not exist!', $tmpDir)
+            );
+        }
+
+        if ( ! is_writable($tmpDir)) {
+            throw new PandocException(
+                sprintf('Unable to write to the directory %s!', $tmpDir)
+            );
+        }
+
+        $this->tmpDir = $tmpDir;
+
+        $this->tmpFile = sprintf("%s/%s", $this->tmpDir, uniqid("pandoc"));
 
         // Since we can not validate that the command that they give us is
         // *really* pandoc we will just check that its something.
@@ -171,9 +194,9 @@ class Pandoc
     public function runWith($content, $options)
     {
         $commandOptions = array();
-        
+
         $extFilesFormat = array(
-            'docx', 
+            'docx',
             'odt',
             'epub',
             'fb2',
@@ -186,7 +209,7 @@ class Pandoc
             'dzslides',
             'slideous'
         );
-            
+
         foreach ($options as $key => $value) {
             if ($key == 'to' && in_array($value, $extFilesFormat)) {
                 $commandOptions[] = '-s -S -o '.$this->tmpFile.'.'.$value;
@@ -199,7 +222,7 @@ class Pandoc
             } else if ($key == 'to' && $value == 'epub3') {
                 $commandOptions[] = '-S -o '.$this->tmpFile.'.epub';
                 $format = 'epub';
-                continue; 
+                continue;
             } else if ($key == 'to' && $value == 'beamer') {
                 $commandOptions[] = '-s -t beamer -o '.$this->tmpFile.'.pdf';
                 $format = 'pdf';
@@ -229,7 +252,7 @@ class Pandoc
                 $format = 'txt';
                 continue;
             }
-             
+
 
             if (null === $value) {
                 $commandOptions[] = "--$key";
@@ -240,7 +263,7 @@ class Pandoc
         }
 
         file_put_contents($this->tmpFile, $content);
-            
+
         $command = sprintf(
             "%s %s %s",
             $this->executable,
@@ -249,7 +272,7 @@ class Pandoc
         );
 
         exec($command, $output);
-        
+
         if (isset($format)) {
                 return file_get_contents($this->tmpFile.'.'.$format);
         } else {
@@ -266,7 +289,7 @@ class Pandoc
             @unlink($this->tmpFile);
         }
 
-        foreach (glob($this->tmpFile.'.*') as $filename) {
+        foreach (glob($this->tmpFile.'*') as $filename) {
             @unlink($filename);
         }
     }
@@ -281,5 +304,14 @@ class Pandoc
         exec(sprintf('%s --version', $this->executable), $output);
 
         return trim(str_replace('pandoc', '', $output[0]));
+    }
+
+    /**
+     * Return that path where we are storing temporary files
+     * @return string
+     */
+    public function getTmpDir()
+    {
+        return $this->tmpDir;
     }
 }

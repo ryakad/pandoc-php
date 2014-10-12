@@ -33,6 +33,29 @@ class PandocTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException Pandoc\PandocException
      */
+    public function testUnWritableTempDirThrowsException()
+    {
+        // Assuming that were not running with write access to the /usr dir
+        $pandoc = new Pandoc(null, '/usr');
+    }
+
+    /**
+     * @expectedException Pandoc\PandocException
+     */
+    public function testInvalidTmpDirectoryThrowsException()
+    {
+        $pandoc = new Pandoc(null, '/this-is-probably-not-a-valid-directory');
+    }
+
+    public function testCanSetDifferentTempDir()
+    {
+        $pandoc = new Pandoc(null, '/tmp');
+        $this->assertTrue($pandoc->getTmpDir() === '/tmp');
+    }
+
+    /**
+     * @expectedException Pandoc\PandocException
+     */
     public function testInvalidFromTypeTriggersException()
     {
         $this->pandoc->convert("#Test Content", "not_value", "plain");
