@@ -263,6 +263,7 @@ class Pandoc
         }
 
         file_put_contents($this->tmpFile, $content);
+        chmod($this->tmpFile, 0777);
 
         $command = sprintf(
             "%s %s %s",
