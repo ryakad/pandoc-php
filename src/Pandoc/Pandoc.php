@@ -52,7 +52,16 @@ class Pandoc
         "docbook",
         "textile",
         "html",
-        "latex"
+        "latex",
+        "commonmark",
+        "docx",
+        "epub",
+        "haddock",
+        "odt",
+        "opml",
+        "org",
+        "t2t",
+        "twiki"
     );
 
     /**
@@ -91,7 +100,15 @@ class Pandoc
         "textile",
         "rtf",
         "org",
-        "asciidoc"
+        "asciidoc",
+        "commonmark",
+        "dokuwiki",
+        "haddock",
+        "icml",
+        "odt",
+        "opml",
+        "revealjs",
+        "tei"
     );
 
     /**
