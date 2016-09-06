@@ -99,6 +99,8 @@ class Pandoc
      *
      * @param string $executable Path to the pandoc executable
      * @param string $tmpDir     Path to where we want to store temporary files
+     *
+     * @throws PandocException
      */
     public function __construct($executable = null, $tmpDir = null)
     {
@@ -139,15 +141,22 @@ class Pandoc
         if ( ! is_executable($this->executable)) {
             throw new PandocException('Pandoc executable is not executable');
         }
+
+        // If the HOME env variable is not defined, pandoc fails, so we set a faked value
+        if ( ! isset($_ENV['HOME'])) {
+            putenv('HOME='.getcwd());
+        }
     }
 
     /**
      * Run the conversion from one type to another
      *
+     * @param string $content
      * @param string $from The type we are converting from
      * @param string $to   The type we want to convert the document to
      *
      * @return string
+     * @throws PandocException
      */
     public function convert($content, $from, $to)
     {
@@ -190,6 +199,7 @@ class Pandoc
      * @param array  $options The options to use
      *
      * @return string The returned content
+     * @throws PandocException
      */
     public function runWith($content, $options)
     {
@@ -274,17 +284,19 @@ class Pandoc
 
 
         exec($command, $output, $returnval);
-        if($returnval === 0)
-        {
+        if ($returnval === 0) {
             if (isset($format)) {
                 return file_get_contents($this->tmpFile.'.'.$format);
             } else {
                 return implode("\n", $output);
             }
-        }else
-        {
+        } else {
             throw new PandocException(
-                sprintf('Pandoc could not convert successfully, error code: %s. Tried to run the following command: %s', $returnval, $command)
+                sprintf(
+                    'Pandoc could not convert successfully, error code: %s. Tried to run the following command: %s',
+                    $returnval,
+                    $command
+                )
             );
         }
     }
