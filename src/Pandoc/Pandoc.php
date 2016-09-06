@@ -46,7 +46,7 @@ class Pandoc
         "epub",
         "haddock",
         "html",
-        "json*",
+        "json",
         "latex",
         "markdown",
         "markdown_github",
