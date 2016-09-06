@@ -141,6 +141,11 @@ class Pandoc
         if ( ! is_executable($this->executable)) {
             throw new PandocException('Pandoc executable is not executable');
         }
+
+        // If the HOME env variable is not defined, pandoc fails, so we set a faked value
+        if ( ! isset($_ENV['HOME'])) {
+            putenv('HOME='.getcwd());
+        }
     }
 
     /**
