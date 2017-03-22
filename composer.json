@@ -1,5 +1,5 @@
 {
-    "name": "ryakad/pandoc-php",
+    "name": "gafhyb/pandoc-php",
     "license": "MIT",
     "autoload": {
         "psr-0": {
