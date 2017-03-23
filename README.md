@@ -1,7 +1,6 @@
 Pandoc PHP
 ==========
 
-[![Build Status](https://secure.travis-ci.org/ryakad/pandoc-php.png)](http://travis-ci.org/ryakad/pandoc-php)
 
 Pandoc PHP is a naive wrapper for the Pandoc command. Pandoc is a Haskell
 program that allows you to convert documents from one format to another. For
@@ -20,7 +19,7 @@ The recommended method to installing Pandoc PHP is with [composer](http://getcom
 ```json
 {
     "require": {
-        "ryakad/pandoc-php": "~1.0"
+        "gafhyb/pandoc-php": "~1.0"
     }
 }
 ```
