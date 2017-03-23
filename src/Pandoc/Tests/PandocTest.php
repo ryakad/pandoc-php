@@ -71,9 +71,10 @@ class PandocTest extends \PHPUnit_Framework_TestCase
 
     public function testBasicMarkdownToHTML()
     {
-        if (false === strpos($this->pandoc->getVersion(), '1.12.')) {
+        $pieces = explode(".", $this->pandoc->getVersion());
+        if ($pieces[0] < 1 || ($pieces[0] == 1 && $pieces[1] < 12)) {
             $this->markTestSkipped(
-                'This test requires pandoc version 1.12'
+                'This test requires pandoc version >= 1.12'
             );
         }
 
@@ -85,9 +86,10 @@ class PandocTest extends \PHPUnit_Framework_TestCase
 
     public function testRunWithConvertsBasicMarkdownToJSON()
     {
-        if (false === strpos($this->pandoc->getVersion(), '1.12.')) {
+        $pieces = explode(".", $this->pandoc->getVersion());
+        if ($pieces[0] < 1 || ($pieces[0] == 1 && $pieces[1] < 12)) {
             $this->markTestSkipped(
-                'This test requires pandoc version 1.12'
+                'This test requires pandoc version >= 1.12'
             );
         }
 
