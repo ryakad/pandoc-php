@@ -50,6 +50,7 @@ class Pandoc
         "rst",
         "mediawiki",
         "docbook",
+        "docx",
         "textile",
         "html",
         "latex"
