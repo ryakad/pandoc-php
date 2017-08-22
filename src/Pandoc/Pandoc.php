@@ -173,7 +173,7 @@ class Pandoc
             $this->tmpFile
         );
 
-        exec($command, $output);
+        exec(escapeshellcmd($command), $output);
 
         return implode("\n", $output);
     }
@@ -273,7 +273,7 @@ class Pandoc
         );
 
 
-        exec($command, $output, $returnval);
+        exec(escapeshellcmd($command), $output, $returnval);
         if($returnval === 0)
         {
             if (isset($format)) {
