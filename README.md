@@ -17,12 +17,8 @@ you just need to make sure you have at least version 1.10 for this library).
 
 The recommended method to installing Pandoc PHP is with [composer](http://getcomposer.org)
 
-```json
-{
-    "require": {
-        "ryakad/pandoc-php": "~1.0"
-    }
-}
+```bash
+composer require ryakad/pandoc-php
 ```
 
 Once installed you can start converting your content to other formats like:
