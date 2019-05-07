@@ -267,7 +267,8 @@ class Pandoc
         file_put_contents($this->tmpFile, $content);
         chmod($this->tmpFile, 0777);
         $timeout = floatval($timeout);
-        $exe = $timeout > 0 ? "timeout $timeout {$this->executable}" : $this->executable;
+        $ktimeout = $timeout * 2;
+        $exe = $timeout > 0 ? "timeout -k {$ktimeout}s {$timeout}s {$this->executable}" : $this->executable;
         $command = sprintf(
             "%s %s %s",
             $exe,
