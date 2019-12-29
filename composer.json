@@ -1,9 +1,13 @@
 {
     "name": "chinapedia/pandoc-php",
+    "description": "chinapedia/pandoc-php",
+    "type": "library",
     "license": "MIT",
-    "autoload": {
-        "psr-0": {
-            "Pandoc": "src"
+    "authors": [
+        {
+            "name": "liruqi",
+            "email": "liruqi@gmail.com"
         }
-    }
+    ],
+    "require": {}
 }
