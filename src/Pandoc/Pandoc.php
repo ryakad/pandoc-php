@@ -262,6 +262,13 @@ class Pandoc
                 continue;
             }
 
+            if (is_array($value)) {
+                foreach($value as $k => $v) {
+                    $commandOptions[] = "--$key=$v";
+                }
+                continue;
+            }
+
             $commandOptions[] = "--$key=$value";
         }
 
