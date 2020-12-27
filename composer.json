@@ -9,5 +9,9 @@
             "email": "liruqi@gmail.com"
         }
     ],
-    "require": {}
+    "autoload": {
+        "psr-4": {
+            "Pandoc": "src/"
+        }
+    }
 }
