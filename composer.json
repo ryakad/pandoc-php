@@ -1,6 +1,12 @@
 {
     "name": "ryakad/pandoc-php",
     "license": "MIT",
+    "require": {
+        "php": "^5.5 || ^7.1 || ^8.0"
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^5.2"
+    },
     "autoload": {
         "psr-0": {
             "Pandoc": "src"
