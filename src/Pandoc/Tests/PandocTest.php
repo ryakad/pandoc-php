@@ -11,39 +11,36 @@
 namespace Pandoc\Tests;
 
 use Pandoc\Pandoc;
+use Symfony\Bridge\PhpUnit\SetUpTearDownTrait;
 
 /**
  * @author Ryan Kadwell <ryan@riaka.ca>
  */
-class PandocTest extends \PHPUnit_Framework_TestCase
+class PandocTest extends \PHPUnit\Framework\TestCase
 {
-    public function setup()
+    use SetUpTearDownTrait;
+
+    private function doSetUp()
     {
         $this->pandoc = new Pandoc();
     }
 
-    /**
-     * @expectedException Pandoc\PandocException
-     */
     public function testInvalidPandocCommandThrowsException()
     {
+        $this->expectException(\Pandoc\PandocException::class);
         $pandoc = new Pandoc('/bin/notpandoc');
     }
 
-    /**
-     * @expectedException Pandoc\PandocException
-     */
     public function testUnWritableTempDirThrowsException()
     {
+        $this->expectException(\Pandoc\PandocException::class);
         // Assuming that were not running with write access to the /usr dir
         $pandoc = new Pandoc(null, '/usr');
     }
 
-    /**
-     * @expectedException Pandoc\PandocException
-     */
     public function testInvalidTmpDirectoryThrowsException()
     {
+        $this->expectException(\Pandoc\PandocException::class);
         $pandoc = new Pandoc(null, '/this-is-probably-not-a-valid-directory');
     }
 
@@ -53,19 +50,15 @@ class PandocTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($pandoc->getTmpDir() === '/tmp');
     }
 
-    /**
-     * @expectedException Pandoc\PandocException
-     */
     public function testInvalidFromTypeTriggersException()
     {
+        $this->expectException(\Pandoc\PandocException::class);
         $this->pandoc->convert("#Test Content", "not_value", "plain");
     }
 
-    /**
-     * @expectedException Pandoc\PandocException
-     */
     public function testInvalidToTypeTriggersException()
     {
+        $this->expectException(\Pandoc\PandocException::class);
         $this->pandoc->convert("#Test Content", "html", "not_valid");
     }
 
@@ -105,7 +98,7 @@ class PandocTest extends \PHPUnit_Framework_TestCase
     public function testCanConvertMultipleSuccessfully()
     {
         $this->pandoc->convert(
-            "#Heading 1\n##Heading 2",
+            "# Heading 1\n## Heading 2",
             "markdown",
             "html"
         );
@@ -113,7 +106,7 @@ class PandocTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             "<h3 id=\"heading-3\">Heading 3</h3>\n<h4 id=\"heading-4\">Heading 4</h4>",
             $this->pandoc->convert(
-                "###Heading 3\n####Heading 4",
+                "### Heading 3\n#### Heading 4",
                 "markdown",
                 "html"
             )
