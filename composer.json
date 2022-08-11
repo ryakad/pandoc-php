@@ -1,9 +1,17 @@
 {
-    "name": "ryakad/pandoc-php",
+    "name": "chinapedia/pandoc-php",
+    "description": "chinapedia/pandoc-php",
+    "type": "library",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "liruqi",
+            "email": "liruqi@gmail.com"
+        }
+    ],
     "autoload": {
-        "psr-0": {
-            "Pandoc": "src"
+        "psr-4": {
+            "Pandoc": "src/"
         }
     }
 }

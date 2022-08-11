@@ -167,7 +167,8 @@ class Pandoc
         file_put_contents($this->tmpFile, $content);
 
         $command = sprintf(
-            '%s --from=%s --to=%s %s',
+            '%s --log=$s/pandoc.log --from=%s --to=%s %s',
+            $this->tmpDir,
             $this->executable,
             $from,
             $to,
@@ -192,7 +193,7 @@ class Pandoc
      *
      * @return string The returned content
      */
-    public function runWith($content, $options)
+    public function runWith($content, $options, $pOptions = 0)
     {
         $commandOptions = array();
 
@@ -212,51 +213,59 @@ class Pandoc
         );
 
         foreach ($options as $key => $value) {
-            if ($key == 'to' && in_array($value, $extFilesFormat)) {
-                $commandOptions[] = '-s -S -o '.$this->tmpFile.'.'.$value;
-                $format = $value;
-                continue;
-            } else if ($key == 'to' && in_array($value, $extFilesHtmlSlide)) {
-                $commandOptions[] = '-s -t '.$value.' -o '.$this->tmpFile.'.html';
-                $format = 'html';
-                continue;
-            } else if ($key == 'to' && $value == 'epub3') {
-                $commandOptions[] = '-S -o '.$this->tmpFile.'.epub';
-                $format = 'epub';
-                continue;
-            } else if ($key == 'to' && $value == 'beamer') {
-                $commandOptions[] = '-s -t beamer -o '.$this->tmpFile.'.pdf';
-                $format = 'pdf';
-                continue;
-            } else if ($key == 'to' && $value == 'latex') {
-                $commandOptions[] = '-s -o '.$this->tmpFile.'.tex';
-                $format = 'tex';
-                continue;
-            } else if ($key == 'to' && $value == 'rst') {
-                $commandOptions[] = '-s -t rst --toc -o '.$this->tmpFile.'.text';
-                $format = 'text';
-                continue;
-            } else if ($key == 'to' && $value == 'rtf') {
-                $commandOptions[] = '-s -o '.$this->tmpFile.'.'.$value;
-                $format = $value;
-                continue;
-            } else if ($key == 'to' && $value == 'docbook') {
-                $commandOptions[] = '-s -S -t docbook -o '.$this->tmpFile.'.db';
-                $format = 'db';
-                continue;
-            } else if ($key == 'to' && $value == 'context') {
-                $commandOptions[] = '-s -t context -o '.$this->tmpFile.'.tex';
-                $format = 'tex';
-                continue;
-            } else if ($key == 'to' && $value == 'asciidoc') {
-                $commandOptions[] = '-s -S -t asciidoc -o '.$this->tmpFile.'.txt';
-                $format = 'txt';
-                continue;
+            if ($key == 'to') {
+                if (in_array($value, $extFilesFormat)) {
+                    $commandOptions[] = '-s -S -o '.$this->tmpFile.'.'.$value;
+                    $format = $value;
+                    continue;
+                } else if (in_array($value, $extFilesHtmlSlide)) {
+                    $commandOptions[] = '-s -t '.$value.' -o '.$this->tmpFile.'.html';
+                    $format = 'html';
+                    continue;
+                } else if ($value == 'epub3') {
+                    $commandOptions[] = '-S -o '.$this->tmpFile.'.epub';
+                    $format = 'epub';
+                    continue;
+                } else if ($value == 'beamer') {
+                    $commandOptions[] = '-s -t beamer -o '.$this->tmpFile.'.pdf';
+                    $format = 'pdf';
+                    continue;
+                } else if ($value == 'latex') {
+                    $commandOptions[] = '-s -o '.$this->tmpFile.'.tex';
+                    $format = 'tex';
+                    continue;
+                } else if ($value == 'rst') {
+                    $commandOptions[] = '-s -t rst --toc -o '.$this->tmpFile.'.text';
+                    $format = 'text';
+                    continue;
+                } else if ($value == 'rtf') {
+                    $commandOptions[] = '-s -o '.$this->tmpFile.'.'.$value;
+                    $format = $value;
+                    continue;
+                } else if ($value == 'docbook') {
+                    $commandOptions[] = '-s -S -t docbook -o '.$this->tmpFile.'.db';
+                    $format = 'db';
+                    continue;
+                } else if ($value == 'context') {
+                    $commandOptions[] = '-s -t context -o '.$this->tmpFile.'.tex';
+                    $format = 'tex';
+                    continue;
+                } else if ($value == 'asciidoc') {
+                    $commandOptions[] = '-s -S -t asciidoc -o '.$this->tmpFile.'.txt';
+                    $format = 'txt';
+                    continue;
+                }
             }
-
 
             if (null === $value) {
                 $commandOptions[] = "--$key";
+                continue;
+            }
+
+            if (is_array($value)) {
+                foreach($value as $k => $v) {
+                    $commandOptions[] = "--$key=$v";
+                }
                 continue;
             }
 
@@ -265,27 +274,37 @@ class Pandoc
 
         file_put_contents($this->tmpFile, $content);
         chmod($this->tmpFile, 0777);
-
+        $timeout = floatval($pOptions['timeout']);
+        $ktimeout = $timeout * 2;
+        $exe = $timeout > 0 ? "timeout -k {$ktimeout}s {$timeout}s {$this->executable}" : $this->executable;
         $command = sprintf(
             "%s %s %s",
-            $this->executable,
+            $exe,
             implode(' ', $commandOptions),
-            $this->tmpFile
+            $this->tmpFile,
         );
-
-
-        exec(escapeshellcmd($command), $output, $returnval);
-        if($returnval === 0)
+        if ($pOptions['stdout']) {
+            $command = escapeshellcmd($command) . " >" . $pOptions['stdout'] . " 2>" . $pOptions['stderr']; 
+        } else {
+            $command = escapeshellcmd($command);
+        }
+        exec($command, $output, $returnval);
+        if($returnval === 0 || $returnval === 124) // 124 timeout
         {
             if (isset($format)) {
                 return file_get_contents($this->tmpFile.'.'.$format);
             } else {
                 return implode("\n", $output);
             }
-        }else
+        }
+        else
         {
+            $stderr = file_get_contents($pOptions['stderr']);
+            if ($stderr) {
+                file_put_contents($pOptions['stderr'], mb_ereg_replace('pandoc[a-z0-9]+', "a.wikitext", $stderr));
+            }
             throw new PandocException(
-                sprintf('Pandoc could not convert successfully, error code: %s. Tried to run the following command: %s', $returnval, $command)
+                sprintf('Pandoc could not convert successfully, error code: %s. Tried to run the following command: %s stderr:%s', $returnval, $command, $stderr)
             );
         }
     }
