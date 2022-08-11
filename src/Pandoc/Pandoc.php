@@ -193,7 +193,7 @@ class Pandoc
      *
      * @return string The returned content
      */
-    public function runWith($content, $options, $timeout = 0)
+    public function runWith($content, $options, $pOptions = 0)
     {
         $commandOptions = array();
 
@@ -274,28 +274,37 @@ class Pandoc
 
         file_put_contents($this->tmpFile, $content);
         chmod($this->tmpFile, 0777);
-        $timeout = floatval($timeout);
+        $timeout = floatval($pOptions['timeout']);
         $ktimeout = $timeout * 2;
         $exe = $timeout > 0 ? "timeout -k {$ktimeout}s {$timeout}s {$this->executable}" : $this->executable;
         $command = sprintf(
             "%s %s %s",
             $exe,
             implode(' ', $commandOptions),
-            $this->tmpFile
+            $this->tmpFile,
         );
-
-        exec(escapeshellcmd($command), $output, $returnval);
-        if($returnval === 0)
+        if ($pOptions['stdout']) {
+            $command = escapeshellcmd($command) . " >" . $pOptions['stdout'] . " 2>" . $pOptions['stderr']; 
+        } else {
+            $command = escapeshellcmd($command);
+        }
+        exec($command, $output, $returnval);
+        if($returnval === 0 || $returnval === 124) // 124 timeout
         {
             if (isset($format)) {
                 return file_get_contents($this->tmpFile.'.'.$format);
             } else {
                 return implode("\n", $output);
             }
-        }else
+        }
+        else
         {
+            $stderr = file_get_contents($pOptions['stderr']);
+            if ($stderr) {
+                file_put_contents($pOptions['stderr'], mb_ereg_replace('pandoc[a-z0-9]+', "a.wikitext", $stderr));
+            }
             throw new PandocException(
-                sprintf('Pandoc could not convert successfully, error code: %s. Tried to run the following command: %s', $returnval, $command)
+                sprintf('Pandoc could not convert successfully, error code: %s. Tried to run the following command: %s stderr:%s', $returnval, $command, $stderr)
             );
         }
     }
